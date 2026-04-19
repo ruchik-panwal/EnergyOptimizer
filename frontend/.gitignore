@@ -1,0 +1,49 @@
+# --- Build Outputs ---
+dist/
+dist-ssr/
+*.local
+
+# --- Dependencies ---
+node_modules/
+jspm_packages/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# --- Logs ---
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# --- Environment Variables (Secrets) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+# Also ignore the specific Vite env files
+.env.development
+.env.production
+
+# --- Editor Directories and Files ---
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# --- Testing ---
+coverage/
+.nyc_output/
+
+# --- Misc ---
+.vercel/
+.cache/
