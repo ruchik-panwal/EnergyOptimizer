@@ -60,5 +60,6 @@ def optimize(data: MicrogridData):
 
 if __name__ == "__main__":
     import uvicorn
+    import os
     # Using 0.0.0.0 helps WSL bridge the connection to your Windows browser
     uvicorn.run(app, host="0.0.0.0", port=8000)
