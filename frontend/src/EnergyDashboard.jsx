@@ -95,7 +95,7 @@ export default function EnergyDashboard() {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 border-b border-neutral-800/80">
           <div>
             <h1 className="text-3xl font-medium tracking-tight text-neutral-100">
-              HEMS Command
+              Hybrid Energy Management System
             </h1>
             <p className="text-neutral-500 text-sm mt-1">Real-time constrained optimization</p>
           </div>
