@@ -10,6 +10,15 @@ import {
   Battery, 
   Activity 
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
 
 export default function EnergyDashboard() {
   const [inputs, setInputs] = useState({
@@ -69,10 +78,10 @@ export default function EnergyDashboard() {
   // Map results to standard structure with icons and distinct modern colors
   const dispatchData = results
     ? [
-        { id: "grid", name: "Grid Power", value: results.dispatch.grid, color: "#f43f5e", icon: <Activity size={20} /> },   // Rose
-        { id: "diesel", name: "Diesel Gen", value: results.dispatch.diesel, color: "#f97316", icon: <Flame size={20} /> },      // Orange
-        { id: "battery", name: "Battery", value: results.dispatch.battery, color: "#10b981", icon: <Battery size={20} /> },   // Emerald
-        { id: "ev", name: "EV V2H", value: results.dispatch.ev, color: "#6366f1", icon: <Car size={20} /> },             // Indigo
+        { id: "grid", name: "Grid Power", value: results.dispatch.grid, color: "#f43f5e", icon: <Activity size={20} /> },   
+        { id: "diesel", name: "Diesel Gen", value: results.dispatch.diesel, color: "#f97316", icon: <Flame size={20} /> },      
+        { id: "battery", name: "Battery", value: results.dispatch.battery, color: "#10b981", icon: <Battery size={20} /> },   
+        { id: "ev", name: "EV V2H", value: results.dispatch.ev, color: "#6366f1", icon: <Car size={20} /> },             
       ]
     : [];
 
@@ -135,22 +144,34 @@ export default function EnergyDashboard() {
                   onChange={(v) => setInputs({ ...inputs, grid_price: v })}
                 />
 
-                {/* EV Toggle Switch */}
+                {/* EV Status Segmented Control */}
                 <div className="pt-4 border-t border-[#222]">
-                  <div className="flex items-center justify-between">
+                  <div className="space-y-3">
                     <span className="text-sm font-medium flex items-center gap-2 text-neutral-400">
-                      <Car size={16} /> EV Connection
+                      <Car size={16} /> Vehicle Status
                     </span>
-                    <button
-                      onClick={() => setInputs({ ...inputs, ev_at_home: !inputs.ev_at_home })}
-                      className={`relative inline-flex h-7 w-14 items-center rounded-full transition-colors duration-300 focus:outline-none ${
-                        inputs.ev_at_home ? "bg-indigo-500" : "bg-neutral-700"
-                      }`}
-                    >
-                      <span className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-300 ${
-                        inputs.ev_at_home ? "translate-x-8" : "translate-x-1"
-                      }`} />
-                    </button>
+                    <div className="flex bg-[#1a1a1a] border border-[#2a2a2a] rounded-xl p-1">
+                      <button
+                        onClick={() => setInputs({ ...inputs, ev_at_home: true })}
+                        className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all duration-200 ${
+                          inputs.ev_at_home 
+                            ? "bg-[#2a2a2a] text-indigo-400 shadow-sm" 
+                            : "text-neutral-500 hover:text-neutral-300"
+                        }`}
+                      >
+                        At Home
+                      </button>
+                      <button
+                        onClick={() => setInputs({ ...inputs, ev_at_home: false })}
+                        className={`flex-1 py-2 text-xs font-bold uppercase tracking-widest rounded-lg transition-all duration-200 ${
+                          !inputs.ev_at_home 
+                            ? "bg-[#2a2a2a] text-neutral-200 shadow-sm" 
+                            : "text-neutral-500 hover:text-neutral-300"
+                        }`}
+                      >
+                        Away
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -160,7 +181,7 @@ export default function EnergyDashboard() {
           {/* RIGHT PANEL: Outputs (Col Span 8) */}
           <div className={`lg:col-span-8 flex flex-col gap-6 transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
             
-            {/* Top Row: Total Cost & Composition Bar */}
+            {/* Top Row: Total Cost & Bar Chart */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
               {/* Cost Card */}
@@ -172,30 +193,47 @@ export default function EnergyDashboard() {
                 </p>
               </div>
 
-              {/* Composition Bar Card */}
-              <div className="md:col-span-2 bg-[#111] border border-[#222] rounded-3xl p-6 flex flex-col justify-center gap-4">
-                <div className="flex justify-between items-end">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Energy Mix Setup</p>
+              {/* Bar Chart Card */}
+              <div className="md:col-span-2 bg-[#111] border border-[#222] rounded-3xl p-6 flex flex-col justify-center gap-4 min-h-[220px]">
+                <div className="flex justify-between items-end mb-2">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-neutral-500">Energy Dispatch Profile</p>
                   <p className="text-sm text-neutral-400 font-mono">{totalDispatched.toFixed(1)} kW Total</p>
                 </div>
                 
-                {/* Horizontal Stacked Bar */}
-                <div className="w-full h-8 bg-[#1a1a1a] rounded-full overflow-hidden flex ring-1 ring-inset ring-white/5">
+                {/* Recharts BarChart */}
+                <div className="w-full h-[140px]">
                   {totalDispatched > 0 ? (
-                    dispatchData.map((item) => {
-                      const width = `${(item.value / totalDispatched) * 100}%`;
-                      if (item.value === 0) return null;
-                      return (
-                        <div
-                          key={item.id}
-                          className="h-full transition-all duration-700 hover:brightness-110"
-                          style={{ width, backgroundColor: item.color }}
-                          title={`${item.name}: ${item.value.toFixed(1)} kW`}
+                    <ResponsiveContainer width="100%" height="100%">
+                      <BarChart data={dispatchData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                        <XAxis 
+                          dataKey="name" 
+                          axisLine={false} 
+                          tickLine={false} 
+                          tick={{ fill: '#737373', fontSize: 11, fontWeight: 500 }} 
+                          dy={5}
                         />
-                      );
-                    })
+                        <YAxis hide={true} />
+                        <Tooltip
+                          cursor={{ fill: "#1a1a1a", radius: 4 }}
+                          contentStyle={{
+                            backgroundColor: "#111",
+                            border: "1px solid #2a2a2a",
+                            borderRadius: "12px",
+                            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)",
+                            color: "#f5f5f5"
+                          }}
+                          itemStyle={{ color: "#d4d4d4", fontWeight: "bold" }}
+                          formatter={(value) => [`${value.toFixed(2)} kW`, 'Dispatched']}
+                        />
+                        <Bar dataKey="value" radius={[6, 6, 0, 0]} maxBarSize={48}>
+                          {dispatchData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={entry.color} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   ) : (
-                    <div className="w-full h-full bg-neutral-800/50 flex items-center justify-center text-[10px] uppercase tracking-widest text-neutral-500">
+                    <div className="w-full h-full flex items-center justify-center text-[10px] uppercase tracking-widest text-neutral-600 border border-dashed border-[#222] rounded-xl">
                       Awaiting Data
                     </div>
                   )}
